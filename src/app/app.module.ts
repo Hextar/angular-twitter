@@ -1,15 +1,33 @@
-import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http'; 
 import { BrowserModule } from '@angular/platform-browser';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatCardModule } from '@angular/material/card';
+import { HttpClientModule } from '@angular/common/http';
+import { MatDialogModule } from "@angular/material";
+import { MyDialogComponent } from './my-dialog/my-dialog.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 
-import { AppComponent } from './app.component';
-import { TrendingTopicsComponent } from './trending-topics.component';
-
 @NgModule({
-  imports:      [ BrowserModule, FormsModule, HttpClientModule  ],
-  declarations: [ AppComponent, TrendingTopicsComponent ],
-  bootstrap:    [ AppComponent ],
-  providers: []
+  declarations: [
+    AppComponent,
+    MyDialogComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    MatToolbarModule,
+    MatCardModule,
+    HttpClientModule,
+    MatDialogModule,
+    BrowserAnimationsModule,
+    FormsModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent],
+  entryComponents: [MyDialogComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule { }

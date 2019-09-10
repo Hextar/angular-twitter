@@ -1,39 +1,68 @@
-import { Component } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { TwitterService } from './twitter.service';
+import { MatDialog, MatDialogConfig } from "@angular/material";
+import { MyDialogComponent } from './my-dialog/my-dialog.component';
 
 @Component({
-  selector: 'my-app',
+  selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: [ './app.component.css' ]
+  styleUrls: ['./app.component.scss']
 })
-export class AppComponent  {
-  baseUrl = 'https://api.twitter.com/1.1/search/tweets.json';
-  query = '?q=trend&result_type=popular&lang=it';
-  authentication = 'OAuth oauth_consumer_key=\"lmE6PKfXQ41zCRE3NqHxcLe1G\",oauth_token=\"283522188-5qbx8ii18xs7GE1nfXqFBUfKGOx166cw1hcOpWUT\",oauth_signature_method=\"HMAC-SHA1\",oauth_timestamp=\"1568107052\",oauth_nonce=\"A4ML0RQ8X4y\",oauth_version=\"1.0\",oauth_signature=\"RuAYgc5Y4ErjpQFjFg8Ce8gxLq4%3D\"';
-  trendingTopics: string[];
-  
-  constructor(
-    private http: HttpClient
-  ){
-    const httpHeaders = new HttpHeaders ({
-      'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS,DELETE,PUT',
-      'Authorization': JSON.stringify(this.authentication)
-    });
+export class AppComponent {
+  numTweets: number = 30;
+  tweetRows: Array<any> = [];
 
-    this.http.get(this.baseUrl + this.query, { headers: httpHeaders })
-      .subscribe((res: any) => {
-        console.log(res);
-      },  
-      error => {
-        console.log('HTTP ERROR', error);
-      },
-      () => {
-        console.log('finished')
-      }
-    );
+  constructor(private twitterService: TwitterService, private dialog: MatDialog) {
+    let _numTweets = +localStorage.getItem('numTweets');
+    if(_numTweets)
+      this.numTweets = _numTweets;
+
+    this.loadTweets();
   }
-  
+
+  async loadTweets() {
+    this.tweetRows = [];
+
+    const makeschool: Array<any> = await this.twitterService.getTweets(this.numTweets, 'makeschool');
+    const newsycombinator: Array<any> = await this.twitterService.getTweets(this.numTweets, 'newsycombinator');
+    const ycombinator: Array<any> = await this.twitterService.getTweets(this.numTweets, 'ycombinator');
+
+    // Organize the tweets as rows in a matrix
+    for(let i = 0; i < this.numTweets; i++)
+      this.tweetRows.push([
+        makeschool[i],
+        newsycombinator[i],
+        ycombinator[i]
+      ]);
+  }
+
+  openDialog() {
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.data = {
+      numTweets: this.numTweets,
+      numTweetsCallback: numTweets => {
+        this.numTweets = numTweets;
+        localStorage.setItem('numTweets', numTweets);
+        this.loadTweets();
+      },
+      orderCallback: direction => {
+        if(direction < 0) {
+          this.tweetRows.forEach(row => {
+            const _tmp = row[0];
+            row[0] = row[1];
+            row[1] = row[2];
+            row[2] = _tmp;
+          });
+        } else {
+          this.tweetRows.forEach(row => {
+            const _tmp = row[2];
+            row[2] = row[1];
+            row[1] = row[0];
+            row[0] = _tmp;
+          });
+        }
+      }
+    };
+    this.dialog.open(MyDialogComponent, dialogConfig);
+  }
 }

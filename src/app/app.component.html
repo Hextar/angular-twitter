@@ -1,1 +1,63 @@
-<app-trending-topics [trendingTopics]="trendingTopics"></app-trending-topics>
+<header>
+  <mat-toolbar color="primary">
+    <div class="row">
+      <div class="col-md-11">
+        Turing Twitter API Exercise
+      </div>
+
+      <div class="col-md-1 settings">
+        <button (click)="openDialog()" type="button" class="btn btn-primary bmd-btn-icon">
+          <i class="material-icons">settings</i>
+        </button>
+      </div>
+    </div>
+  </mat-toolbar>
+</header>
+
+<section class="container">
+  <div *ngIf="!tweetRows.length" class="loading">
+    <h3>Loading...</h3>
+  </div>
+  <div class="row" *ngFor="let row of tweetRows">
+    <div class="col-md-4" *ngFor="let tweet of row">
+      <mat-card>
+        <mat-card-subtitle>
+          <div class="row">
+            <div class="col-md-6">
+              @{{ tweet.user.screen_name }}
+            </div>
+            <div class="col-md-6 retweeted_screen_name">
+              <a target="_blank" href="https://twitter.com/{{tweet.retweeted_status.user.screen_name}}/status/{{tweet.retweeted_status.id_str}}" *ngIf="tweet.retweeted_status">
+                RT @{{ tweet.retweeted_status.user.screen_name }}
+              </a>
+            </div>
+          </div>
+        </mat-card-subtitle>
+
+        <mat-card-content>
+          {{ tweet.text }}
+        </mat-card-content>
+
+        <mat-card-footer>
+          <div class="row">
+            <div class="col-md-8 mentions">
+              <div *ngIf="tweet.entities.user_mentions.length">
+                Mentions
+                <a target="_blank" href="https://twitter.com/{{user.screen_name}}" *ngFor="let user of tweet.entities.user_mentions; index as i">
+                  @{{ user.screen_name }} <i *ngIf="i < tweet.entities.user_mentions.length - 1">,</i>
+                </a>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <a target="_blank" href="https://twitter.com/{{tweet.user.screen_name}}/status/{{tweet.id_str}}">
+                {{ tweet.created_at | date }}
+              </a>
+            </div>
+          </div>
+        </mat-card-footer>
+      </mat-card>
+    </div>
+  </div>
+</section>
+
+<footer></footer>
